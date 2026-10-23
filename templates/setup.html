@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HomeIQ Setup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="container">
+        <section class="panel setup">
+            <p class="eyebrow">SETUP REQUIRED</p>
+            <h1>Dataset load nahi hua</h1>
+            <p>Check karo ki <code>mumbai_housing.csv</code> file, <code>app.py</code> ke same folder mein hai.</p>
+            <p class="error">{{ error }}</p>
+            <p>CSV file ke column names bhi check karo.</p>
+        </section>
+    </main>
+</body>
+</html>

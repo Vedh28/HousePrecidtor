@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HomeIQ | House Price Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+    <a class="logo" href="/">Home<span>IQ</span></a>
+    <span class="tag">HOUSE PRICE INTELLIGENCE</span>
+</header>
+
+<main class="container">
+
+    <section class="hero">
+        <p class="eyebrow">MACHINE LEARNING PROJECT</p>
+        <h1>Discover your property's <span>estimated value.</span></h1>
+        <p>Explore the dataset, compare regression models and estimate a value from property details.</p>
+    </section>
+
+    <section class="stats">
+        <div class="stat">
+            <p>Valid dataset records</p>
+            <h2>{{ "{:,}".format(rows) }}</h2>
+        </div>
+        <div class="stat">
+            <p>Average target value</p>
+            <h2>₹{{ "{:,.0f}".format(average_price) }}</h2>
+        </div>
+        <div class="stat">
+            <p>Random Forest MAE</p>
+            <h2>₹{{ "{:,.0f}".format(mae) }}</h2>
+        </div>
+        <div class="stat">
+            <p>Random Forest R²</p>
+            <h2>{{ "%.3f"|format(r2) }}</h2>
+        </div>
+    </section>
+
+    <section class="grid">
+        <div class="panel">
+            <p class="eyebrow">PRICE ESTIMATOR</p>
+            <h2>Enter property details</h2>
+
+            <form id="predictionForm">
+                <div class="form-grid">
+                    <div>
+                        <label for="longitude">Longitude</label>
+                        <input id="longitude" type="number" step="any" value="72.85" required>
+                    </div>
+                    <div>
+                        <label for="latitude">Latitude</label>
+                        <input id="latitude" type="number" step="any" value="19.10" required>
+                    </div>
+                    <div>
+                        <label for="age">Housing median age</label>
+                        <input id="age" type="number" min="0" max="200" value="30" required>
+                    </div>
+                    <div>
+                        <label for="rooms">Total rooms</label>
+                        <input id="rooms" type="number" min="1" value="1500" required>
+                    </div>
+                    <div>
+                        <label for="bedrooms">Total bedrooms</label>
+                        <input id="bedrooms" type="number" min="1" value="300" required>
+                    </div>
+                    <div>
+                        <label for="population">Population</label>
+                        <input id="population" type="number" min="1" value="1000" required>
+                    </div>
+                    <div>
+                        <label for="households">Households</label>
+                        <input id="households" type="number" min="1" value="250" required>
+                    </div>
+                    <div>
+                        <label for="income">Median income</label>
+                        <input id="income" type="number" min="0.01" step="any" value="3.5" required>
+                    </div>
+                </div>
+
+                <label for="proximity">Ocean proximity category</label>
+                <select id="proximity" required>
+                    {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+
+                <button id="predictButton" type="submit">Predict estimated value →</button>
+                <p id="error" class="error"></p>
+            </form>
+
+            <div id="result" class="result" hidden>
+                <p class="eyebrow">MODEL ESTIMATE</p>
+                <h2 id="price"></h2>
+                <p>Predicted by Random Forest Regression.</p>
+                <small>This is a model estimate based on the uploaded dataset, not a verified market valuation.</small>
+            </div>
+        </div>
+
+        <div class="panel">
+            <p class="eyebrow">DATA EXPLORER</p>
+            <h2>Average value by category</h2>
+            <div class="chart-box"><canvas id="categoryChart"></canvas></div>
+            <p class="muted">Averages are calculated from the loaded CSV after basic cleaning.</p>
+        </div>
+    </section>
+
+    <section class="panel section">
+        <p class="eyebrow">MODEL ANALYTICS</p>
+        <h2>Actual vs predicted values</h2>
+        <div class="chart-box large"><canvas id="actualChart"></canvas></div>
+        <p class="muted">The points show a sample of held-out test records. A closer match between actual and predicted values is generally better.</p>
+    </section>
+
+    <section class="panel section">
+        <p class="eyebrow">MODEL EVALUATION</p>
+        <h2>Compare regression models</h2>
+        <p class="muted">All models are evaluated on the same held-out test split.</p>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>R²</th>
+                        <th>MAE</th>
+                        <th>MSE</th>
+                        <th>RMSE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in results %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ "%.3f"|format(item.r2) }}</td>
+                        <td>{{ "{:,.2f}".format(item.mae) }}</td>
+                        <td>{{ "{:,.2f}".format(item.mse) }}</td>
+                        <td>{{ "{:,.2f}".format(item.rmse) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="definitions">
+            <p><strong>R²:</strong> Indicates how much of the target variation the model explains. Higher is generally better.</p>
+            <p><strong>MAE:</strong> Average absolute difference between actual and predicted values.</p>
+            <p><strong>MSE:</strong> Average squared prediction error; larger errors have more influence.</p>
+            <p><strong>RMSE:</strong> Square root of MSE, expressed in the target's units.</p>
+        </div>
+    </section>
+
+    <footer>HomeIQ · House Price Prediction · Flask + Scikit-learn</footer>
+</main>
+
+<script>
+    window.houseData = {{ chart_data | tojson }};
+</script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
